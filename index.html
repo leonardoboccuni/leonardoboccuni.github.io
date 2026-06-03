@@ -76,12 +76,7 @@
       font-weight: bold;
       text-align: center;
       color: var(--muted);
-    }
-
-    .connect-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
+      word-break: break-word;
     }
 
     button {
@@ -106,10 +101,6 @@
       background: var(--purple);
       font-size: 20px;
       padding: 16px;
-    }
-
-    .connect-btn:hover {
-      background: var(--purple2);
     }
 
     .section {
@@ -196,18 +187,18 @@
       align-items: center;
     }
 
-    .hold-btn {
+    .test-btn {
       min-height: 115px;
       font-size: 30px;
       border-radius: 24px;
       background: var(--grey);
     }
 
-    .hold-btn.blue.on {
+    .test-btn.blue.on {
       background: var(--blue);
     }
 
-    .hold-btn.red.on {
+    .test-btn.red.on {
       background: var(--redChannel);
     }
 
@@ -236,7 +227,7 @@
       padding: 4px 8px;
     }
 
-    .disabled-note {
+    .note {
       color: var(--warning);
       font-size: 14px;
       text-align: center;
@@ -274,7 +265,7 @@
         padding: 14px;
       }
 
-      .hold-btn {
+      .test-btn {
         min-height: 95px;
         font-size: 26px;
       }
@@ -287,11 +278,9 @@
     <div class="topbar">
       <h1>NanoFES Gait Controller</h1>
       <div id="status" class="status">Status: not connected</div>
-      <div class="connect-row">
-        <button class="connect-btn" onclick="connectBluetooth()">
-          Connect to NanoFES_GAIT
-        </button>
-      </div>
+      <button class="connect-btn" onclick="connectBluetooth()">
+        Connect to NanoFES_GAIT
+      </button>
     </div>
 
     <div class="section">
@@ -304,7 +293,7 @@
           LEFT LEG
         </button>
       </div>
-      <div class="disabled-note">
+      <div class="note">
         Right leg = forward sign +1. Left leg = forward sign -1.
       </div>
     </div>
@@ -320,49 +309,51 @@
 
     <div class="channel blue">
       <div class="channel-title">Blue channel pulse width</div>
+
       <div class="calibration-row">
         <button class="small-btn" onclick="changePulse('BLUE', -10)">−</button>
-        <div id="blueBox" class="value-box">300 µs</div>
+        <div id="blueBox" class="value-box">50 µs</div>
         <button class="small-btn" onclick="changePulse('BLUE', 10)">+</button>
       </div>
 
       <button
-        id="blueHold"
-        class="hold-btn blue"
-        onpointerdown="holdChannel(event, 'BLUE', true)"
-        onpointerup="holdChannel(event, 'BLUE', false)"
-        onpointerleave="holdChannel(event, 'BLUE', false)"
-        onpointercancel="holdChannel(event, 'BLUE', false)"
+        id="blueTest"
+        class="test-btn blue"
+        onpointerdown="testChannel(event, 'BLUE', true)"
+        onpointerup="testChannel(event, 'BLUE', false)"
+        onpointerleave="testChannel(event, 'BLUE', false)"
+        onpointercancel="testChannel(event, 'BLUE', false)"
       >
-        HOLD BLUE
+        TEST BLUE
       </button>
 
-      <div class="disabled-note">
-        To increase BLUE intensity, keep HOLD BLUE pressed while pressing +.
+      <div class="note">
+        Press and hold TEST BLUE to deliver stimulation during calibration.
       </div>
     </div>
 
     <div class="channel red">
       <div class="channel-title">Red channel pulse width</div>
+
       <div class="calibration-row">
         <button class="small-btn" onclick="changePulse('RED', -10)">−</button>
-        <div id="redBox" class="value-box">300 µs</div>
+        <div id="redBox" class="value-box">50 µs</div>
         <button class="small-btn" onclick="changePulse('RED', 10)">+</button>
       </div>
 
       <button
-        id="redHold"
-        class="hold-btn red"
-        onpointerdown="holdChannel(event, 'RED', true)"
-        onpointerup="holdChannel(event, 'RED', false)"
-        onpointerleave="holdChannel(event, 'RED', false)"
-        onpointercancel="holdChannel(event, 'RED', false)"
+        id="redTest"
+        class="test-btn red"
+        onpointerdown="testChannel(event, 'RED', true)"
+        onpointerup="testChannel(event, 'RED', false)"
+        onpointerleave="testChannel(event, 'RED', false)"
+        onpointercancel="testChannel(event, 'RED', false)"
       >
-        HOLD RED
+        TEST RED
       </button>
 
-      <div class="disabled-note">
-        To increase RED intensity, keep HOLD RED pressed while pressing +.
+      <div class="note">
+        Press and hold TEST RED to deliver stimulation during calibration.
       </div>
     </div>
 
@@ -375,7 +366,7 @@
     </div>
 
     <div class="footer">
-      Calibration: HOLD delivers stimulation manually. START enables gyroscope-triggered stimulation. STOP pauses stimulation.
+      Calibration: TEST delivers stimulation manually. START enables gyroscope-triggered stimulation. STOP pauses stimulation.
     </div>
   </div>
 
@@ -391,11 +382,11 @@
 
     let selectedLeg = "RIGHT";
     let frequencyHz = 40;
-    let pulseBlue = 300;
-    let pulseRed = 300;
+    let pulseBlue = 50;
+    let pulseRed = 50;
 
-    let holdBlue = false;
-    let holdRed = false;
+    let testBlue = false;
+    let testRed = false;
 
     const statusBox = document.getElementById("status");
     const rightBtn = document.getElementById("rightBtn");
@@ -403,8 +394,8 @@
     const freqBox = document.getElementById("freqBox");
     const blueBox = document.getElementById("blueBox");
     const redBox = document.getElementById("redBox");
-    const blueHold = document.getElementById("blueHold");
-    const redHold = document.getElementById("redHold");
+    const blueTest = document.getElementById("blueTest");
+    const redTest = document.getElementById("redTest");
 
     function setStatus(text) {
       statusBox.innerText = "Status: " + text;
@@ -419,8 +410,8 @@
       blueBox.innerText = pulseBlue + " µs";
       redBox.innerText = pulseRed + " µs";
 
-      blueHold.classList.toggle("on", holdBlue);
-      redHold.classList.toggle("on", holdRed);
+      blueTest.classList.toggle("on", testBlue);
+      redTest.classList.toggle("on", testRed);
     }
 
     async function connectBluetooth() {
@@ -481,8 +472,8 @@
       commandCharacteristic = null;
       statusCharacteristic = null;
 
-      holdBlue = false;
-      holdRed = false;
+      testBlue = false;
+      testRed = false;
 
       updateUi();
       setStatus("disconnected");
@@ -528,11 +519,6 @@
 
     async function changePulse(channel, delta) {
       if (channel === "BLUE") {
-        if (delta > 0 && !holdBlue) {
-          setStatus("hold BLUE while pressing + to increase");
-          return;
-        }
-
         pulseBlue = Math.max(10, Math.min(500, pulseBlue + delta));
         updateUi();
         await sendCommand("SET BLUE " + pulseBlue);
@@ -540,11 +526,6 @@
       }
 
       if (channel === "RED") {
-        if (delta > 0 && !holdRed) {
-          setStatus("hold RED while pressing + to increase");
-          return;
-        }
-
         pulseRed = Math.max(10, Math.min(500, pulseRed + delta));
         updateUi();
         await sendCommand("SET RED " + pulseRed);
@@ -552,16 +533,16 @@
       }
     }
 
-    async function holdChannel(event, channel, state) {
+    async function testChannel(event, channel, state) {
       event.preventDefault();
 
       if (channel === "BLUE") {
-        if (holdBlue === state) return;
+        if (testBlue === state) return;
 
-        holdBlue = state;
+        testBlue = state;
         updateUi();
 
-        await sendCommand("HOLD BLUE " + (state ? "1" : "0"));
+        await sendCommand("TEST BLUE " + (state ? "1" : "0"));
 
         if (state && navigator.vibrate) {
           navigator.vibrate(40);
@@ -571,12 +552,12 @@
       }
 
       if (channel === "RED") {
-        if (holdRed === state) return;
+        if (testRed === state) return;
 
-        holdRed = state;
+        testRed = state;
         updateUi();
 
-        await sendCommand("HOLD RED " + (state ? "1" : "0"));
+        await sendCommand("TEST RED " + (state ? "1" : "0"));
 
         if (state && navigator.vibrate) {
           navigator.vibrate(40);
@@ -587,9 +568,12 @@
     }
 
     async function startWorking() {
-      holdBlue = false;
-      holdRed = false;
+      testBlue = false;
+      testRed = false;
       updateUi();
+
+      await sendCommand("TEST BLUE 0");
+      await sendCommand("TEST RED 0");
       await sendCommand("START");
 
       if (navigator.vibrate) {
@@ -598,9 +582,12 @@
     }
 
     async function stopWorking() {
-      holdBlue = false;
-      holdRed = false;
+      testBlue = false;
+      testRed = false;
       updateUi();
+
+      await sendCommand("TEST BLUE 0");
+      await sendCommand("TEST RED 0");
       await sendCommand("STOP");
 
       if (navigator.vibrate) {
@@ -610,21 +597,21 @@
 
     window.addEventListener("blur", async () => {
       if (connected) {
-        holdBlue = false;
-        holdRed = false;
+        testBlue = false;
+        testRed = false;
         updateUi();
-        await sendCommand("HOLD BLUE 0");
-        await sendCommand("HOLD RED 0");
+        await sendCommand("TEST BLUE 0");
+        await sendCommand("TEST RED 0");
       }
     });
 
     document.addEventListener("visibilitychange", async () => {
       if (document.hidden && connected) {
-        holdBlue = false;
-        holdRed = false;
+        testBlue = false;
+        testRed = false;
         updateUi();
-        await sendCommand("HOLD BLUE 0");
-        await sendCommand("HOLD RED 0");
+        await sendCommand("TEST BLUE 0");
+        await sendCommand("TEST RED 0");
       }
     });
 
