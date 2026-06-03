@@ -2,127 +2,425 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Nano BLE LED Control</title>
+  <title>NanoFES Gait Controller</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
   <style>
-    body {
-      margin: 0;
-      background: #111111;
-      color: white;
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-      touch-action: none;
+    :root {
+      --bg: #0f0f0f;
+      --panel: #1b1b1b;
+      --panel2: #242424;
+      --text: #ffffff;
+      --muted: #cccccc;
+      --grey: #3a3a3a;
+      --grey2: #4a4a4a;
+      --purple: #5e35b1;
+      --purple2: #7e57c2;
+      --green: #2e7d32;
+      --red: #c62828;
+      --blue: #1e88e5;
+      --redChannel: #e53935;
+      --warning: #f9a825;
     }
 
-    .panel {
-      width: min(90vw, 700px);
-      height: min(85vh, 600px);
-      background: #1b1b1b;
-      border-radius: 28px;
-      padding: 30px;
+    * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      user-select: none;
+      touch-action: manipulation;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+    }
+
+    .app {
+      width: min(100%, 760px);
+      min-height: calc(100vh - 28px);
+      background: #111111;
+      border-radius: 28px;
+      padding: 18px;
       display: grid;
-      grid-template-rows: auto auto 1fr auto;
-      gap: 22px;
-      text-align: center;
+      grid-template-rows: auto auto auto auto auto 1fr auto;
+      gap: 14px;
+    }
+
+    .topbar {
+      background: var(--panel);
+      border-radius: 20px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
     }
 
     h1 {
       margin: 0;
-      font-size: 32px;
+      font-size: 26px;
+      text-align: center;
     }
 
     .status {
-      background: #333333;
-      border-radius: 16px;
-      padding: 14px;
-      font-size: 18px;
+      background: var(--grey);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 15px;
       font-weight: bold;
+      text-align: center;
+      color: var(--muted);
     }
 
-    .connect {
+    .connect-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    button {
       border: none;
       border-radius: 18px;
-      background: #5e35b1;
       color: white;
-      font-size: 22px;
-      font-weight: bold;
-      padding: 18px;
-      cursor: pointer;
-    }
-
-    .main-button {
-      border: none;
-      border-radius: 36px;
-      background: #3a3a3a;
-      color: white;
-      font-size: 42px;
       font-weight: bold;
       cursor: pointer;
       touch-action: none;
     }
 
-    .main-button:active {
-      background: #2e7d32;
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    button:active:not(:disabled) {
       transform: scale(0.98);
     }
 
-    .main-button.on {
-      background: #2e7d32;
+    .connect-btn {
+      background: var(--purple);
+      font-size: 20px;
+      padding: 16px;
     }
 
-    .hint {
-      color: #cccccc;
-      font-size: 16px;
+    .connect-btn:hover {
+      background: var(--purple2);
+    }
+
+    .section {
+      background: var(--panel);
+      border-radius: 22px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .leg-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background: var(--grey);
+      padding: 16px;
+      font-size: 20px;
+    }
+
+    .choice-btn.active {
+      background: var(--purple);
+      outline: 3px solid white;
+    }
+
+    .frequency-grid {
+      display: grid;
+      grid-template-columns: 80px 1fr 80px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .small-btn {
+      background: var(--grey);
+      font-size: 30px;
+      min-height: 62px;
+    }
+
+    .value-box {
+      background: var(--panel2);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .channel {
+      border-radius: 24px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .channel.blue {
+      background: rgba(30, 136, 229, 0.25);
+      border: 2px solid var(--blue);
+    }
+
+    .channel.red {
+      background: rgba(229, 57, 53, 0.25);
+      border: 2px solid var(--redChannel);
+    }
+
+    .channel-title {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .calibration-row {
+      display: grid;
+      grid-template-columns: 70px 1fr 70px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hold-btn {
+      min-height: 115px;
+      font-size: 30px;
+      border-radius: 24px;
+      background: var(--grey);
+    }
+
+    .hold-btn.blue.on {
+      background: var(--blue);
+    }
+
+    .hold-btn.red.on {
+      background: var(--redChannel);
+    }
+
+    .start-stop-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .start-btn {
+      background: var(--green);
+      font-size: 26px;
+      padding: 18px;
+    }
+
+    .stop-btn {
+      background: var(--red);
+      font-size: 26px;
+      padding: 18px;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 4px 8px;
+    }
+
+    .disabled-note {
+      color: var(--warning);
+      font-size: 14px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 8px;
+      }
+
+      .app {
+        border-radius: 18px;
+        padding: 12px;
+        gap: 10px;
+        min-height: calc(100vh - 16px);
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .frequency-grid,
+      .calibration-row {
+        grid-template-columns: 62px 1fr 62px;
+      }
+
+      .small-btn {
+        font-size: 26px;
+        min-height: 56px;
+      }
+
+      .value-box {
+        font-size: 24px;
+        padding: 14px;
+      }
+
+      .hold-btn {
+        min-height: 95px;
+        font-size: 26px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="panel">
-    <h1>Nano BLE LED Control</h1>
+  <div class="app">
+    <div class="topbar">
+      <h1>NanoFES Gait Controller</h1>
+      <div id="status" class="status">Status: not connected</div>
+      <div class="connect-row">
+        <button class="connect-btn" onclick="connectBluetooth()">
+          Connect to NanoFES_GAIT
+        </button>
+      </div>
+    </div>
 
-    <div id="status" class="status">Status: not connected</div>
+    <div class="section">
+      <div class="section-title">1. Select leg</div>
+      <div class="leg-row">
+        <button id="rightBtn" class="choice-btn active" onclick="setLeg('RIGHT')">
+          RIGHT LEG
+        </button>
+        <button id="leftBtn" class="choice-btn" onclick="setLeg('LEFT')">
+          LEFT LEG
+        </button>
+      </div>
+      <div class="disabled-note">
+        Right leg = forward sign +1. Left leg = forward sign -1.
+      </div>
+    </div>
 
-    <button class="connect" onclick="connectBluetooth()">
-      Connect to NanoFES_LED
-    </button>
+    <div class="section">
+      <div class="section-title">2. Common stimulation frequency</div>
+      <div class="frequency-grid">
+        <button class="small-btn" onclick="changeFrequency(-1)">−</button>
+        <div id="freqBox" class="value-box">40 Hz</div>
+        <button class="small-btn" onclick="changeFrequency(1)">+</button>
+      </div>
+    </div>
 
-    <button
-      id="ledButton"
-      class="main-button"
-      onpointerdown="ledOn(event)"
-      onpointerup="ledOff(event)"
-      onpointerleave="ledOff(event)"
-      onpointercancel="ledOff(event)"
-      disabled
-    >
-      HOLD LED
-    </button>
+    <div class="channel blue">
+      <div class="channel-title">Blue channel pulse width</div>
+      <div class="calibration-row">
+        <button class="small-btn" onclick="changePulse('BLUE', -10)">−</button>
+        <div id="blueBox" class="value-box">300 µs</div>
+        <button class="small-btn" onclick="changePulse('BLUE', 10)">+</button>
+      </div>
 
-    <div class="hint">
-      Hold the button to turn the LED ON. Release to turn it OFF.
+      <button
+        id="blueHold"
+        class="hold-btn blue"
+        onpointerdown="holdChannel(event, 'BLUE', true)"
+        onpointerup="holdChannel(event, 'BLUE', false)"
+        onpointerleave="holdChannel(event, 'BLUE', false)"
+        onpointercancel="holdChannel(event, 'BLUE', false)"
+      >
+        HOLD BLUE
+      </button>
+
+      <div class="disabled-note">
+        To increase BLUE intensity, keep HOLD BLUE pressed while pressing +.
+      </div>
+    </div>
+
+    <div class="channel red">
+      <div class="channel-title">Red channel pulse width</div>
+      <div class="calibration-row">
+        <button class="small-btn" onclick="changePulse('RED', -10)">−</button>
+        <div id="redBox" class="value-box">300 µs</div>
+        <button class="small-btn" onclick="changePulse('RED', 10)">+</button>
+      </div>
+
+      <button
+        id="redHold"
+        class="hold-btn red"
+        onpointerdown="holdChannel(event, 'RED', true)"
+        onpointerup="holdChannel(event, 'RED', false)"
+        onpointerleave="holdChannel(event, 'RED', false)"
+        onpointercancel="holdChannel(event, 'RED', false)"
+      >
+        HOLD RED
+      </button>
+
+      <div class="disabled-note">
+        To increase RED intensity, keep HOLD RED pressed while pressing +.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">3. Working phase</div>
+      <div class="start-stop-row">
+        <button class="start-btn" onclick="startWorking()">START</button>
+        <button class="stop-btn" onclick="stopWorking()">STOP</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      Calibration: HOLD delivers stimulation manually. START enables gyroscope-triggered stimulation. STOP pauses stimulation.
     </div>
   </div>
 
   <script>
     const SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
-    const CHARACTERISTIC_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214";
+    const COMMAND_UUID = "19b10010-e8f2-537e-4f6c-d104768a1214";
+    const STATUS_UUID  = "19b10011-e8f2-537e-4f6c-d104768a1214";
 
     let device = null;
-    let ledCharacteristic = null;
+    let commandCharacteristic = null;
+    let statusCharacteristic = null;
     let connected = false;
 
+    let selectedLeg = "RIGHT";
+    let frequencyHz = 40;
+    let pulseBlue = 300;
+    let pulseRed = 300;
+
+    let holdBlue = false;
+    let holdRed = false;
+
     const statusBox = document.getElementById("status");
-    const ledButton = document.getElementById("ledButton");
+    const rightBtn = document.getElementById("rightBtn");
+    const leftBtn = document.getElementById("leftBtn");
+    const freqBox = document.getElementById("freqBox");
+    const blueBox = document.getElementById("blueBox");
+    const redBox = document.getElementById("redBox");
+    const blueHold = document.getElementById("blueHold");
+    const redHold = document.getElementById("redHold");
 
     function setStatus(text) {
       statusBox.innerText = "Status: " + text;
       console.log(text);
+    }
+
+    function updateUi() {
+      rightBtn.classList.toggle("active", selectedLeg === "RIGHT");
+      leftBtn.classList.toggle("active", selectedLeg === "LEFT");
+
+      freqBox.innerText = frequencyHz + " Hz";
+      blueBox.innerText = pulseBlue + " µs";
+      redBox.innerText = pulseRed + " µs";
+
+      blueHold.classList.toggle("on", holdBlue);
+      redHold.classList.toggle("on", holdRed);
     }
 
     async function connectBluetooth() {
@@ -131,7 +429,7 @@
 
         device = await navigator.bluetooth.requestDevice({
           filters: [
-            { name: "NanoFES_LED" }
+            { name: "NanoFES_GAIT" }
           ],
           optionalServices: [SERVICE_UUID]
         });
@@ -146,14 +444,32 @@
 
         const service = await server.getPrimaryService(SERVICE_UUID);
 
-        setStatus("getting characteristic...");
+        setStatus("getting command characteristic...");
 
-        ledCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+        commandCharacteristic = await service.getCharacteristic(COMMAND_UUID);
+
+        try {
+          statusCharacteristic = await service.getCharacteristic(STATUS_UUID);
+          await statusCharacteristic.startNotifications();
+          statusCharacteristic.addEventListener(
+            "characteristicvaluechanged",
+            handleStatusNotification
+          );
+        } catch (error) {
+          console.log("Status notifications unavailable:", error);
+        }
 
         connected = true;
-        ledButton.disabled = false;
 
-        setStatus("connected to NanoFES_LED");
+        setStatus("connected to NanoFES_GAIT");
+
+        await sendCommand("LEG " + selectedLeg);
+        await sendCommand("FREQ " + frequencyHz);
+        await sendCommand("SET BLUE " + pulseBlue);
+        await sendCommand("SET RED " + pulseRed);
+        await sendCommand("STOP");
+
+        updateUi();
       } catch (error) {
         console.error(error);
         setStatus("error: " + error.message);
@@ -162,40 +478,157 @@
 
     function onDisconnected() {
       connected = false;
-      ledCharacteristic = null;
-      ledButton.disabled = true;
-      ledButton.classList.remove("on");
+      commandCharacteristic = null;
+      statusCharacteristic = null;
+
+      holdBlue = false;
+      holdRed = false;
+
+      updateUi();
       setStatus("disconnected");
     }
 
-    async function writeLed(value) {
-      if (!connected || !ledCharacteristic) {
+    function handleStatusNotification(event) {
+      const decoder = new TextDecoder();
+      const value = decoder.decode(event.target.value);
+      console.log("STATUS:", value);
+      setStatus("connected | " + value);
+    }
+
+    async function sendCommand(command) {
+      if (!connected || !commandCharacteristic) {
         setStatus("not connected");
-        return;
+        return false;
       }
 
       try {
-        const data = new Uint8Array([value]);
-        await ledCharacteristic.writeValue(data);
+        const encoder = new TextEncoder();
+        const data = encoder.encode(command);
+        await commandCharacteristic.writeValue(data);
+        console.log("CMD:", command);
+        return true;
       } catch (error) {
         console.error(error);
         setStatus("write error: " + error.message);
+        return false;
       }
     }
 
-    async function ledOn(event) {
-      event.preventDefault();
-      ledButton.classList.add("on");
-      ledButton.innerText = "LED ON";
-      await writeLed(1);
+    async function setLeg(leg) {
+      selectedLeg = leg;
+      updateUi();
+      await sendCommand("LEG " + selectedLeg);
     }
 
-    async function ledOff(event) {
-      event.preventDefault();
-      ledButton.classList.remove("on");
-      ledButton.innerText = "HOLD LED";
-      await writeLed(0);
+    async function changeFrequency(delta) {
+      frequencyHz = Math.max(1, Math.min(100, frequencyHz + delta));
+      updateUi();
+      await sendCommand("FREQ " + frequencyHz);
     }
+
+    async function changePulse(channel, delta) {
+      if (channel === "BLUE") {
+        if (delta > 0 && !holdBlue) {
+          setStatus("hold BLUE while pressing + to increase");
+          return;
+        }
+
+        pulseBlue = Math.max(10, Math.min(500, pulseBlue + delta));
+        updateUi();
+        await sendCommand("SET BLUE " + pulseBlue);
+        return;
+      }
+
+      if (channel === "RED") {
+        if (delta > 0 && !holdRed) {
+          setStatus("hold RED while pressing + to increase");
+          return;
+        }
+
+        pulseRed = Math.max(10, Math.min(500, pulseRed + delta));
+        updateUi();
+        await sendCommand("SET RED " + pulseRed);
+        return;
+      }
+    }
+
+    async function holdChannel(event, channel, state) {
+      event.preventDefault();
+
+      if (channel === "BLUE") {
+        if (holdBlue === state) return;
+
+        holdBlue = state;
+        updateUi();
+
+        await sendCommand("HOLD BLUE " + (state ? "1" : "0"));
+
+        if (state && navigator.vibrate) {
+          navigator.vibrate(40);
+        }
+
+        return;
+      }
+
+      if (channel === "RED") {
+        if (holdRed === state) return;
+
+        holdRed = state;
+        updateUi();
+
+        await sendCommand("HOLD RED " + (state ? "1" : "0"));
+
+        if (state && navigator.vibrate) {
+          navigator.vibrate(40);
+        }
+
+        return;
+      }
+    }
+
+    async function startWorking() {
+      holdBlue = false;
+      holdRed = false;
+      updateUi();
+      await sendCommand("START");
+
+      if (navigator.vibrate) {
+        navigator.vibrate([60, 40, 60]);
+      }
+    }
+
+    async function stopWorking() {
+      holdBlue = false;
+      holdRed = false;
+      updateUi();
+      await sendCommand("STOP");
+
+      if (navigator.vibrate) {
+        navigator.vibrate(120);
+      }
+    }
+
+    window.addEventListener("blur", async () => {
+      if (connected) {
+        holdBlue = false;
+        holdRed = false;
+        updateUi();
+        await sendCommand("HOLD BLUE 0");
+        await sendCommand("HOLD RED 0");
+      }
+    });
+
+    document.addEventListener("visibilitychange", async () => {
+      if (document.hidden && connected) {
+        holdBlue = false;
+        holdRed = false;
+        updateUi();
+        await sendCommand("HOLD BLUE 0");
+        await sendCommand("HOLD RED 0");
+      }
+    });
+
+    updateUi();
   </script>
 </body>
 </html>
