@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Nano BLE LED Control</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #111111;
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .panel {
+      width: min(90vw, 700px);
+      height: min(85vh, 600px);
+      background: #1b1b1b;
+      border-radius: 28px;
+      padding: 30px;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 22px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    .status {
+      background: #333333;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .connect {
+      border: none;
+      border-radius: 18px;
+      background: #5e35b1;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      padding: 18px;
+      cursor: pointer;
+    }
+
+    .main-button {
+      border: none;
+      border-radius: 36px;
+      background: #3a3a3a;
+      color: white;
+      font-size: 42px;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .main-button:active {
+      background: #2e7d32;
+      transform: scale(0.98);
+    }
+
+    .main-button.on {
+      background: #2e7d32;
+    }
+
+    .hint {
+      color: #cccccc;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="panel">
+    <h1>Nano BLE LED Control</h1>
+
+    <div id="status" class="status">Status: not connected</div>
+
+    <button class="connect" onclick="connectBluetooth()">
+      Connect to NanoFES_LED
+    </button>
+
+    <button
+      id="ledButton"
+      class="main-button"
+      onpointerdown="ledOn(event)"
+      onpointerup="ledOff(event)"
+      onpointerleave="ledOff(event)"
+      onpointercancel="ledOff(event)"
+      disabled
+    >
+      HOLD LED
+    </button>
+
+    <div class="hint">
+      Hold the button to turn the LED ON. Release to turn it OFF.
+    </div>
+  </div>
+
+  <script>
+    const SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
+    const CHARACTERISTIC_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214";
+
+    let device = null;
+    let ledCharacteristic = null;
+    let connected = false;
+
+    const statusBox = document.getElementById("status");
+    const ledButton = document.getElementById("ledButton");
+
+    function setStatus(text) {
+      statusBox.innerText = "Status: " + text;
+      console.log(text);
+    }
+
+    async function connectBluetooth() {
+      try {
+        setStatus("requesting device...");
+
+        device = await navigator.bluetooth.requestDevice({
+          filters: [
+            { name: "NanoFES_LED" }
+          ],
+          optionalServices: [SERVICE_UUID]
+        });
+
+        device.addEventListener("gattserverdisconnected", onDisconnected);
+
+        setStatus("connecting...");
+
+        const server = await device.gatt.connect();
+
+        setStatus("getting service...");
+
+        const service = await server.getPrimaryService(SERVICE_UUID);
+
+        setStatus("getting characteristic...");
+
+        ledCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+        connected = true;
+        ledButton.disabled = false;
+
+        setStatus("connected to NanoFES_LED");
+      } catch (error) {
+        console.error(error);
+        setStatus("error: " + error.message);
+      }
+    }
+
+    function onDisconnected() {
+      connected = false;
+      ledCharacteristic = null;
+      ledButton.disabled = true;
+      ledButton.classList.remove("on");
+      setStatus("disconnected");
+    }
+
+    async function writeLed(value) {
+      if (!connected || !ledCharacteristic) {
+        setStatus("not connected");
+        return;
+      }
+
+      try {
+        const data = new Uint8Array([value]);
+        await ledCharacteristic.writeValue(data);
+      } catch (error) {
+        console.error(error);
+        setStatus("write error: " + error.message);
+      }
+    }
+
+    async function ledOn(event) {
+      event.preventDefault();
+      ledButton.classList.add("on");
+      ledButton.innerText = "LED ON";
+      await writeLed(1);
+    }
+
+    async function ledOff(event) {
+      event.preventDefault();
+      ledButton.classList.remove("on");
+      ledButton.innerText = "HOLD LED";
+      await writeLed(0);
+    }
+  </script>
+</body>
+</html>
