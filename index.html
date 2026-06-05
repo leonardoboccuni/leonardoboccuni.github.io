@@ -2,26 +2,21 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>NanoFES Gait Controller</title>
+  <title>NANOFES GAIT</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
   <style>
     :root {
-      --bg: #0f0f0f;
-      --panel: #1b1b1b;
-      --panel2: #242424;
-      --text: #ffffff;
-      --muted: #cccccc;
-      --grey: #3a3a3a;
-      --grey2: #4a4a4a;
-      --purple: #5e35b1;
-      --purple2: #7e57c2;
-      --green: #2e7d32;
-      --red: #c62828;
-      --blue: #1e88e5;
-      --redChannel: #e53935;
-      --warning: #f9a825;
+      --bg: #000000;
+      --border: #00384f;
+      --grey: #808080;
+      --purple: #7030a0;
+      --blue: #2028ff;
+      --red: #ff1010;
+      --green: #00b050;
+      --white: #ffffff;
+      --status: #1b1b1b;
     }
 
     * {
@@ -33,241 +28,133 @@
       margin: 0;
       min-height: 100vh;
       background: var(--bg);
-      color: var(--text);
+      color: var(--white);
       font-family: Arial, sans-serif;
-      user-select: none;
-      touch-action: manipulation;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 14px;
+      user-select: none;
+      touch-action: manipulation;
+      overflow: hidden;
     }
 
     .app {
-      width: min(100%, 760px);
-      min-height: calc(100vh - 28px);
-      background: #111111;
+      width: min(100vw, 720px);
+      height: min(100vh, 960px);
+      padding: 4vh 5vw;
+      display: grid;
+      grid-template-rows:
+        1.65fr
+        1fr
+        1fr
+        1fr
+        1fr
+        0.35fr;
+      gap: 3.2vh;
+      background: #000000;
+    }
+
+    .big-button,
+    .info-box,
+    .bottom-button,
+    .status-box {
+      border: 3px solid var(--border);
       border-radius: 28px;
-      padding: 18px;
-      display: grid;
-      grid-template-rows: auto auto auto auto auto 1fr auto;
-      gap: 14px;
-    }
-
-    .topbar {
-      background: var(--panel);
-      border-radius: 20px;
-      padding: 16px;
-      display: grid;
-      gap: 10px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 26px;
+      color: var(--white);
+      font-weight: 400;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none;
     }
 
-    .status {
+    .info-box {
       background: var(--grey);
-      border-radius: 14px;
-      padding: 12px;
-      font-size: 15px;
-      font-weight: bold;
-      text-align: center;
-      color: var(--muted);
-      word-break: break-word;
+      flex-direction: column;
+      gap: 4vh;
+      font-size: clamp(24px, 4.5vw, 38px);
+      line-height: 1.25;
+      padding: 16px;
+    }
+
+    .connect-button {
+      background: var(--purple);
+      font-size: clamp(24px, 4.5vw, 38px);
+    }
+
+    .test-blue {
+      background: var(--blue);
+      font-size: clamp(24px, 4.5vw, 38px);
+    }
+
+    .test-red {
+      background: var(--red);
+      font-size: clamp(24px, 4.5vw, 38px);
+    }
+
+    .test-blue.on,
+    .test-red.on {
+      outline: 5px solid white;
+      filter: brightness(1.2);
+    }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr 1fr;
+      gap: 3.2vw;
+    }
+
+    .bottom-button {
+      font-size: clamp(22px, 4.2vw, 36px);
+      line-height: 1.15;
+      padding: 8px;
+    }
+
+    .bottom-button.green {
+      background: var(--green);
+    }
+
+    .bottom-button.stop {
+      background: var(--red);
+    }
+
+    .bottom-button.active {
+      outline: 5px solid white;
+      filter: brightness(1.1);
+    }
+
+    .status-box {
+      background: var(--status);
+      font-size: clamp(12px, 2.4vw, 18px);
+      padding: 6px 12px;
+      color: #d0d0d0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     button {
       border: none;
-      border-radius: 18px;
-      color: white;
-      font-weight: bold;
       cursor: pointer;
       touch-action: none;
+      font-family: Arial, sans-serif;
     }
 
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
+    button:active {
+      transform: scale(0.985);
     }
 
-    button:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-
-    .connect-btn {
-      background: var(--purple);
-      font-size: 20px;
-      padding: 16px;
-    }
-
-    .section {
-      background: var(--panel);
-      border-radius: 22px;
-      padding: 14px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .leg-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .choice-btn {
-      background: var(--grey);
-      padding: 16px;
-      font-size: 20px;
-    }
-
-    .choice-btn.active {
-      background: var(--purple);
-      outline: 3px solid white;
-    }
-
-    .frequency-grid {
-      display: grid;
-      grid-template-columns: 80px 1fr 80px;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .small-btn {
-      background: var(--grey);
-      font-size: 30px;
-      min-height: 62px;
-    }
-
-    .value-box {
-      background: var(--panel2);
-      border-radius: 16px;
-      padding: 16px;
-      font-size: 28px;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .channel {
-      border-radius: 24px;
-      padding: 14px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .channel.blue {
-      background: rgba(30, 136, 229, 0.25);
-      border: 2px solid var(--blue);
-    }
-
-    .channel.red {
-      background: rgba(229, 57, 53, 0.25);
-      border: 2px solid var(--redChannel);
-    }
-
-    .channel-title {
-      font-size: 22px;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .calibration-row {
-      display: grid;
-      grid-template-columns: 70px 1fr 70px;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .test-btn {
-      min-height: 115px;
-      font-size: 30px;
-      border-radius: 24px;
-      background: var(--grey);
-    }
-
-    .test-btn.blue.on {
-      background: var(--blue);
-    }
-
-    .test-btn.red.on {
-      background: var(--redChannel);
-    }
-
-    .start-stop-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .start-btn {
-      background: var(--green);
-      font-size: 26px;
-      padding: 18px;
-    }
-
-    .stop-btn {
-      background: var(--red);
-      font-size: 26px;
-      padding: 18px;
-    }
-
-    .footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-      padding: 4px 8px;
-    }
-
-    .note {
-      color: var(--warning);
-      font-size: 14px;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    @media (max-width: 520px) {
-      body {
-        padding: 8px;
-      }
-
+    @media (orientation: landscape) {
       .app {
-        border-radius: 18px;
-        padding: 12px;
-        gap: 10px;
-        min-height: calc(100vh - 16px);
+        width: min(65vw, 720px);
+        height: min(100vh, 960px);
+        padding: 3vh 3vw;
+        gap: 2.3vh;
       }
 
-      h1 {
-        font-size: 22px;
-      }
-
-      .frequency-grid,
-      .calibration-row {
-        grid-template-columns: 62px 1fr 62px;
-      }
-
-      .small-btn {
-        font-size: 26px;
-        min-height: 56px;
-      }
-
-      .value-box {
-        font-size: 24px;
-        padding: 14px;
-      }
-
-      .test-btn {
-        min-height: 95px;
-        font-size: 26px;
+      .info-box {
+        gap: 2.5vh;
       }
     }
   </style>
@@ -275,98 +162,53 @@
 
 <body>
   <div class="app">
-    <div class="topbar">
-      <h1>NanoFES Gait Controller</h1>
-      <div id="status" class="status">Status: not connected</div>
-      <button class="connect-btn" onclick="connectBluetooth()">
-        Connect to NanoFES_GAIT
+    <div class="info-box">
+      <div>FES to assist gait (drop-foot)</div>
+      <div>Inventor: Leonardo Boccuni</div>
+    </div>
+
+    <button id="connectBtn" class="big-button connect-button" onclick="connectBluetooth()">
+      Connect to NANOFES_GAIT
+    </button>
+
+    <button
+      id="blueTestBtn"
+      class="big-button test-blue"
+      onpointerdown="testRelay(event, 1, true)"
+      onpointerup="testRelay(event, 1, false)"
+      onpointerleave="testRelay(event, 1, false)"
+      onpointercancel="testRelay(event, 1, false)"
+    >
+      TEST Channel 1 (Blue)
+    </button>
+
+    <button
+      id="redTestBtn"
+      class="big-button test-red"
+      onpointerdown="testRelay(event, 2, true)"
+      onpointerup="testRelay(event, 2, false)"
+      onpointerleave="testRelay(event, 2, false)"
+      onpointercancel="testRelay(event, 2, false)"
+    >
+      TEST Channel 2 (Red)
+    </button>
+
+    <div class="bottom-row">
+      <button id="leftBtn" class="bottom-button green" onclick="setWorkingLeg('LEFT')">
+        LEFT<br>LEG
+      </button>
+
+      <button id="stopBtn" class="bottom-button stop active" onclick="stopSystem()">
+        STOP
+      </button>
+
+      <button id="rightBtn" class="bottom-button green" onclick="setWorkingLeg('RIGHT')">
+        RIGHT<br>LEG
       </button>
     </div>
 
-    <div class="section">
-      <div class="section-title">1. Select leg</div>
-      <div class="leg-row">
-        <button id="rightBtn" class="choice-btn active" onclick="setLeg('RIGHT')">
-          RIGHT LEG
-        </button>
-        <button id="leftBtn" class="choice-btn" onclick="setLeg('LEFT')">
-          LEFT LEG
-        </button>
-      </div>
-      <div class="note">
-        Right leg = forward sign +1. Left leg = forward sign -1.
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">2. Common stimulation frequency</div>
-      <div class="frequency-grid">
-        <button class="small-btn" onclick="changeFrequency(-1)">−</button>
-        <div id="freqBox" class="value-box">40 Hz</div>
-        <button class="small-btn" onclick="changeFrequency(1)">+</button>
-      </div>
-    </div>
-
-    <div class="channel blue">
-      <div class="channel-title">Blue channel pulse width</div>
-
-      <div class="calibration-row">
-        <button class="small-btn" onclick="changePulse('BLUE', -10)">−</button>
-        <div id="blueBox" class="value-box">50 µs</div>
-        <button class="small-btn" onclick="changePulse('BLUE', 10)">+</button>
-      </div>
-
-      <button
-        id="blueTest"
-        class="test-btn blue"
-        onpointerdown="testChannel(event, 'BLUE', true)"
-        onpointerup="testChannel(event, 'BLUE', false)"
-        onpointerleave="testChannel(event, 'BLUE', false)"
-        onpointercancel="testChannel(event, 'BLUE', false)"
-      >
-        TEST BLUE
-      </button>
-
-      <div class="note">
-        Press and hold TEST BLUE to deliver stimulation during calibration.
-      </div>
-    </div>
-
-    <div class="channel red">
-      <div class="channel-title">Red channel pulse width</div>
-
-      <div class="calibration-row">
-        <button class="small-btn" onclick="changePulse('RED', -10)">−</button>
-        <div id="redBox" class="value-box">50 µs</div>
-        <button class="small-btn" onclick="changePulse('RED', 10)">+</button>
-      </div>
-
-      <button
-        id="redTest"
-        class="test-btn red"
-        onpointerdown="testChannel(event, 'RED', true)"
-        onpointerup="testChannel(event, 'RED', false)"
-        onpointerleave="testChannel(event, 'RED', false)"
-        onpointercancel="testChannel(event, 'RED', false)"
-      >
-        TEST RED
-      </button>
-
-      <div class="note">
-        Press and hold TEST RED to deliver stimulation during calibration.
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">3. Working phase</div>
-      <div class="start-stop-row">
-        <button class="start-btn" onclick="startWorking()">START</button>
-        <button class="stop-btn" onclick="stopWorking()">STOP</button>
-      </div>
-    </div>
-
-    <div class="footer">
-      Calibration: TEST delivers stimulation manually. START enables gyroscope-triggered stimulation. STOP pauses stimulation.
+    <div id="statusBox" class="status-box">
+      Status: not connected
     </div>
   </div>
 
@@ -380,22 +222,17 @@
     let statusCharacteristic = null;
     let connected = false;
 
-    let selectedLeg = "RIGHT";
-    let frequencyHz = 40;
-    let pulseBlue = 50;
-    let pulseRed = 50;
+    let currentMode = "STOP";
+    let test1Active = false;
+    let test2Active = false;
 
-    let testBlue = false;
-    let testRed = false;
-
-    const statusBox = document.getElementById("status");
-    const rightBtn = document.getElementById("rightBtn");
+    const statusBox = document.getElementById("statusBox");
+    const connectBtn = document.getElementById("connectBtn");
+    const blueTestBtn = document.getElementById("blueTestBtn");
+    const redTestBtn = document.getElementById("redTestBtn");
     const leftBtn = document.getElementById("leftBtn");
-    const freqBox = document.getElementById("freqBox");
-    const blueBox = document.getElementById("blueBox");
-    const redBox = document.getElementById("redBox");
-    const blueTest = document.getElementById("blueTest");
-    const redTest = document.getElementById("redTest");
+    const stopBtn = document.getElementById("stopBtn");
+    const rightBtn = document.getElementById("rightBtn");
 
     function setStatus(text) {
       statusBox.innerText = "Status: " + text;
@@ -403,15 +240,23 @@
     }
 
     function updateUi() {
-      rightBtn.classList.toggle("active", selectedLeg === "RIGHT");
-      leftBtn.classList.toggle("active", selectedLeg === "LEFT");
+      leftBtn.classList.toggle("active", currentMode === "LEFT");
+      rightBtn.classList.toggle("active", currentMode === "RIGHT");
+      stopBtn.classList.toggle("active", currentMode === "STOP");
 
-      freqBox.innerText = frequencyHz + " Hz";
-      blueBox.innerText = pulseBlue + " µs";
-      redBox.innerText = pulseRed + " µs";
+      blueTestBtn.classList.toggle("on", test1Active);
+      redTestBtn.classList.toggle("on", test2Active);
 
-      blueTest.classList.toggle("on", testBlue);
-      redTest.classList.toggle("on", testRed);
+      const testingAllowed = currentMode === "STOP";
+
+      blueTestBtn.disabled = !testingAllowed || !connected;
+      redTestBtn.disabled = !testingAllowed || !connected;
+
+      if (!connected) {
+        connectBtn.innerText = "Connect to NANOFES_GAIT";
+      } else {
+        connectBtn.innerText = "Connected to NANOFES_GAIT";
+      }
     }
 
     async function connectBluetooth() {
@@ -420,7 +265,7 @@
 
         device = await navigator.bluetooth.requestDevice({
           filters: [
-            { name: "NanoFES_GAIT" }
+            { name: "NANOFES_GAIT" }
           ],
           optionalServices: [SERVICE_UUID]
         });
@@ -451,16 +296,14 @@
         }
 
         connected = true;
-
-        setStatus("connected to NanoFES_GAIT");
-
-        await sendCommand("LEG " + selectedLeg);
-        await sendCommand("FREQ " + frequencyHz);
-        await sendCommand("SET BLUE " + pulseBlue);
-        await sendCommand("SET RED " + pulseRed);
-        await sendCommand("STOP");
+        currentMode = "STOP";
+        test1Active = false;
+        test2Active = false;
 
         updateUi();
+        setStatus("connected");
+
+        await sendCommand("STOP");
       } catch (error) {
         console.error(error);
         setStatus("error: " + error.message);
@@ -469,21 +312,29 @@
 
     function onDisconnected() {
       connected = false;
+
       commandCharacteristic = null;
       statusCharacteristic = null;
 
-      testBlue = false;
-      testRed = false;
+      test1Active = false;
+      test2Active = false;
+
+      /*
+        Important:
+        The Arduino sketch keeps working after Bluetooth disconnect
+        if current mode is LEFT LEG or RIGHT LEG.
+        If disconnection happens during TEST, the Arduino sketch cancels TEST.
+      */
 
       updateUi();
-      setStatus("disconnected");
+      setStatus("disconnected. Nano keeps last working mode unless it was TEST.");
     }
 
     function handleStatusNotification(event) {
       const decoder = new TextDecoder();
       const value = decoder.decode(event.target.value);
       console.log("STATUS:", value);
-      setStatus("connected | " + value);
+      setStatus(value);
     }
 
     async function sendCommand(command) {
@@ -505,44 +356,26 @@
       }
     }
 
-    async function setLeg(leg) {
-      selectedLeg = leg;
-      updateUi();
-      await sendCommand("LEG " + selectedLeg);
-    }
-
-    async function changeFrequency(delta) {
-      frequencyHz = Math.max(1, Math.min(100, frequencyHz + delta));
-      updateUi();
-      await sendCommand("FREQ " + frequencyHz);
-    }
-
-    async function changePulse(channel, delta) {
-      if (channel === "BLUE") {
-        pulseBlue = Math.max(10, Math.min(500, pulseBlue + delta));
-        updateUi();
-        await sendCommand("SET BLUE " + pulseBlue);
-        return;
-      }
-
-      if (channel === "RED") {
-        pulseRed = Math.max(10, Math.min(500, pulseRed + delta));
-        updateUi();
-        await sendCommand("SET RED " + pulseRed);
-        return;
-      }
-    }
-
-    async function testChannel(event, channel, state) {
+    async function testRelay(event, relayNumber, state) {
       event.preventDefault();
 
-      if (channel === "BLUE") {
-        if (testBlue === state) return;
+      if (!connected) {
+        setStatus("not connected");
+        return;
+      }
 
-        testBlue = state;
+      if (currentMode !== "STOP") {
+        setStatus("TEST disabled during LEFT/RIGHT gait mode. Press STOP first.");
+        return;
+      }
+
+      if (relayNumber === 1) {
+        if (test1Active === state) return;
+
+        test1Active = state;
         updateUi();
 
-        await sendCommand("TEST BLUE " + (state ? "1" : "0"));
+        await sendCommand("TEST RELAY1 " + (state ? "1" : "0"));
 
         if (state && navigator.vibrate) {
           navigator.vibrate(40);
@@ -551,13 +384,13 @@
         return;
       }
 
-      if (channel === "RED") {
-        if (testRed === state) return;
+      if (relayNumber === 2) {
+        if (test2Active === state) return;
 
-        testRed = state;
+        test2Active = state;
         updateUi();
 
-        await sendCommand("TEST RED " + (state ? "1" : "0"));
+        await sendCommand("TEST RELAY2 " + (state ? "1" : "0"));
 
         if (state && navigator.vibrate) {
           navigator.vibrate(40);
@@ -567,27 +400,46 @@
       }
     }
 
-    async function startWorking() {
-      testBlue = false;
-      testRed = false;
+    async function setWorkingLeg(leg) {
+      if (!connected) {
+        setStatus("not connected");
+        return;
+      }
+
+      test1Active = false;
+      test2Active = false;
+
+      currentMode = leg;
       updateUi();
 
-      await sendCommand("TEST BLUE 0");
-      await sendCommand("TEST RED 0");
-      await sendCommand("START");
+      if (leg === "LEFT") {
+        await sendCommand("LEFT LEG");
+      } else {
+        await sendCommand("RIGHT LEG");
+      }
 
       if (navigator.vibrate) {
         navigator.vibrate([60, 40, 60]);
       }
     }
 
-    async function stopWorking() {
-      testBlue = false;
-      testRed = false;
+    async function stopSystem() {
+      if (!connected) {
+        currentMode = "STOP";
+        test1Active = false;
+        test2Active = false;
+        updateUi();
+        setStatus("not connected");
+        return;
+      }
+
+      currentMode = "STOP";
+      test1Active = false;
+      test2Active = false;
       updateUi();
 
-      await sendCommand("TEST BLUE 0");
-      await sendCommand("TEST RED 0");
+      await sendCommand("TEST RELAY1 0");
+      await sendCommand("TEST RELAY2 0");
       await sendCommand("STOP");
 
       if (navigator.vibrate) {
@@ -596,22 +448,22 @@
     }
 
     window.addEventListener("blur", async () => {
-      if (connected) {
-        testBlue = false;
-        testRed = false;
+      if (connected && currentMode === "STOP") {
+        test1Active = false;
+        test2Active = false;
         updateUi();
-        await sendCommand("TEST BLUE 0");
-        await sendCommand("TEST RED 0");
+        await sendCommand("TEST RELAY1 0");
+        await sendCommand("TEST RELAY2 0");
       }
     });
 
     document.addEventListener("visibilitychange", async () => {
-      if (document.hidden && connected) {
-        testBlue = false;
-        testRed = false;
+      if (document.hidden && connected && currentMode === "STOP") {
+        test1Active = false;
+        test2Active = false;
         updateUi();
-        await sendCommand("TEST BLUE 0");
-        await sendCommand("TEST RED 0");
+        await sendCommand("TEST RELAY1 0");
+        await sendCommand("TEST RELAY2 0");
       }
     });
 
